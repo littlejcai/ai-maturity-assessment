@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>企业 AI 落地成熟度评估</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
 <style>
   :root {
     --primary: #1e3a8a;
@@ -636,7 +637,7 @@ function drawRadar() {
   // data polygon
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
-    const r = (dimScore(d.id) / 100) * R;
+    const r = (dimScore(DIMENSIONS[i].id) / 100) * R;
     const x = cx + r * Math.cos(angle(i)), y = cy + r * Math.sin(angle(i));
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
@@ -646,7 +647,7 @@ function drawRadar() {
   ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 2.5; ctx.stroke();
   // data points
   for (let i = 0; i < n; i++) {
-    const r = (dimScore(d.id) / 100) * R;
+    const r = (dimScore(DIMENSIONS[i].id) / 100) * R;
     const x = cx + r * Math.cos(angle(i)), y = cy + r * Math.sin(angle(i));
     ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fillStyle = "#1e3a8a"; ctx.fill();
