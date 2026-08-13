@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业 AI 落地成熟度评估</title>
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --primary-light: #3b82f6;
+    --accent: #0ea5e9;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e2e8f0;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --bad: #dc2626;
+    --radius: 14px;
+    --shadow: 0 4px 20px rgba(15, 23, 42, .06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 64px; }
+
+  /* ---------- header ---------- */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0ea5e9 130%);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; right: -60px; top: -60px; width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(14,165,233,.35), transparent 70%);
+    border-radius: 50%;
+  }
+  .hero .badge {
+    display: inline-block; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25);
+    padding: 4px 12px; border-radius: 999px; font-size: 12px; letter-spacing: .08em; margin-bottom: 14px;
+  }
+  .hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: .02em; }
+  .hero p { color: rgba(255,255,255,.82); font-size: 14px; max-width: 640px; }
+
+  /* ---------- cards / sections ---------- */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .muted { color: var(--text-2); font-size: 13.5px; }
+  .dim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .dim-card {
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer;
+    transition: all .15s ease; background: #f8fafc;
+  }
+  .dim-card:hover { border-color: var(--primary-light); box-shadow: 0 4px 14px rgba(59,130,246,.15); transform: translateY(-2px); }
+  .dim-card .icon { font-size: 22px; }
+  .dim-card h3 { font-size: 15px; font-weight: 600; margin: 6px 0 4px; }
+  .dim-card .muted { font-size: 12.5px; }
+  .dim-card .q-count { font-size: 11.5px; color: var(--primary-light); font-weight: 600; }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: none; border-radius: 10px; padding: 12px 22px; font-size: 14.5px; font-weight: 600;
+    cursor: pointer; transition: all .15s ease; font-family: inherit;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; box-shadow: 0 4px 14px rgba(30,58,138,.25); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30,58,138,.32); }
+  .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: #f1f5f9; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .row.between { justify-content: space-between; }
+
+  /* ---------- quiz ---------- */
+  .progress-track { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 999px; transition: width .3s ease; }
+  .quiz-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+  .quiz-head .step { font-size: 13px; color: var(--text-3); font-weight: 600; }
+  .quiz-dim-title { font-size: 19px; font-weight: 700; margin-bottom: 2px; }
+  .quiz-dim-desc { color: var(--text-2); font-size: 13.5px; margin-bottom: 18px; }
+  .question { border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; background: #fff; }
+  .question .q-text { font-size: 14.5px; font-weight: 600; margin-bottom: 12px; }
+  .question .q-hint { font-size: 12.5px; color: var(--text-3); margin-bottom: 10px; }
+  .scale { display: flex; gap: 8px; flex-wrap: wrap; }
+  .scale-item {
+    flex: 1; min-width: 64px; text-align: center; padding: 9px 6px; border: 1.5px solid var(--border);
+    border-radius: 10px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--text-2);
+    transition: all .12s ease; background: #fff;
+  }
+  .scale-item:hover { border-color: var(--primary-light); }
+  .scale-item.sel { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 3px 10px rgba(30,58,138,.3); }
+  .scale-item .n { font-size: 16px; display: block; }
+  .scale-item .l { font-size: 10.5px; font-weight: 500; opacity: .85; }
+
+  /* ---------- result ---------- */
+  .result-top { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: center; }
+  @media (max-width: 640px) { .result-top { grid-template-columns: 1fr; } }
+  .score-ring { position: relative; width: 190px; height: 190px; margin: 0 auto; }
+  .score-ring canvas { width: 190px; height: 190px; display: block; }
+  .score-ring .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-ring .center .num { font-size: 40px; font-weight: 800; color: var(--primary); line-height: 1; }
+  .score-ring .center .cap { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+  .level-box { text-align: center; }
+  .level-box .lv { font-size: 30px; font-weight: 800; letter-spacing: .04em; }
+  .level-box .lv-desc { color: var(--text-2); font-size: 13.5px; margin-top: 6px; }
+  .tag { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .tag.l1 { background: #fee2e2; color: #b91c1c; }
+  .tag.l2 { background: #ffedd5; color: #c2410c; }
+  .tag.l3 { background: #fef9c3; color: #a16207; }
+  .tag.l4 { background: #dcfce7; color: #15803d; }
+  .tag.l5 { background: #dbeafe; color: #1d4ed8; }
+
+  .dim-result { border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .dim-result .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+  .dim-result .head .name { font-size: 15px; font-weight: 700; }
+  .dim-result .bar { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin: 8px 0 10px; }
+  .dim-result .bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width .5s ease; }
+  .dim-result .analysis { font-size: 13.5px; color: var(--text-2); }
+  .dim-result .advice { font-size: 13.5px; margin-top: 8px; }
+  .dim-result .advice strong { color: var(--primary); }
+  .dim-result .advice ul { margin: 4px 0 0 18px; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .pill.ok { background: #dcfce7; color: #15803d; }
+  .pill.mid { background: #fef9c3; color: #a16207; }
+  .pill.low { background: #fee2e2; color: #b91c1c; }
+
+  .plan-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .plan-item:last-child { border-bottom: none; }
+  .plan-item .phase { flex-shrink: 0; width: 88px; font-size: 12.5px; font-weight: 700; color: var(--primary-light); padding-top: 2px; }
+  .plan-item .content { font-size: 14px; }
+  .plan-item .content .t { font-weight: 600; }
+  .plan-item .content .d { color: var(--text-2); font-size: 13px; margin-top: 2px; }
+
+  .report-pre {
+    background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 16px; font-size: 12.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap;
+    word-break: break-word; max-height: 320px; overflow: auto; margin-bottom: 12px;
+  }
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #0f172a; color: #fff; padding: 10px 22px; border-radius: 999px; font-size: 14px;
+    opacity: 0; transition: all .25s ease; z-index: 99; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  footer { text-align: center; color: var(--text-3); font-size: 12.5px; margin-top: 28px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ 首页 ============ -->
+  <section id="view-home">
+    <div class="hero">
+      <span class="badge">ENTERPRISE AI MATURITY ASSESSMENT</span>
+      <h1>企业 AI 落地成熟度评估</h1>
+      <p>从战略、数据、技术、场景、组织、运营六个维度，快速定位企业 AI 落地所处阶段，生成定制化改进建议与 90 天行动计划。适用于企业内部自评、咨询项目尽调与客户现状诊断。</p>
+    </div>
+
+    <div class="card">
+      <h2>📋 评估说明</h2>
+      <ul class="muted" style="margin-left:18px">
+        <li>共 <b>6 个维度 × 4 个问题 = 24 题</b>，每题按符合程度打分（1 分 = 完全不符合，5 分 = 完全符合）</li>
+        <li>请由熟悉企业 AI 全局情况的管理者或项目负责人作答，约需 5–8 分钟</li>
+        <li>结果即时生成：综合得分、成熟度等级、六维雷达图、短板分析与改进建议、90 天行动计划</li>
+        <li>报告可一键复制或下载为 Markdown，方便沉淀为咨询交付物</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🧭 六个评估维度</h2>
+      <div class="dim-grid" id="dim-preview"></div>
+    </div>
+
+    <div class="card" style="text-align:center; padding: 32px">
+      <button class="btn btn-primary" onclick="startQuiz()">开始评估 →</button>
+      <div class="muted" style="margin-top:10px">评估数据仅在本页面本地计算，不会上传任何服务器</div>
+    </div>
+  </section>
+
+  <!-- ============ 问卷 ============ -->
+  <section id="view-quiz" class="hidden">
+    <div class="card">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="quiz-head">
+        <span class="step" id="quiz-step"></span>
+        <span class="step" id="quiz-progress"></span>
+      </div>
+      <div class="quiz-dim-title" id="quiz-dim-title"></div>
+      <div class="quiz-dim-desc" id="quiz-dim-desc"></div>
+      <div id="quiz-questions"></div>
+      <div class="row between" style="margin-top: 18px">
+        <button class="btn btn-ghost" id="quiz-prev" onclick="prevDim()">← 上一维度</button>
+        <button class="btn btn-primary" id="quiz-next" onclick="nextDim()">下一维度 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 结果 ============ -->
+  <section id="view-result" class="hidden">
+    <div class="card result-top">
+      <div class="score-ring">
+        <canvas id="ring-canvas" width="380" height="380"></canvas>
+        <div class="center">
+          <div class="num" id="score-num">0</div>
+          <div class="cap">综合成熟度</div>
+        </div>
+      </div>
+      <div class="level-box">
+        <div class="tag" id="score-tag">L?</div>
+        <div class="lv" id="score-level">—</div>
+        <div class="lv-desc" id="score-desc">—</div>
+        <div class="row" style="justify-content:center; margin-top:16px">
+          <button class="btn btn-primary" onclick="exportMarkdown()">⬇ 下载报告 (.md)</button>
+          <button class="btn btn-ghost" onclick="copyReport()">📋 复制报告</button>
+          <button class="btn btn-ghost" onclick="restart()">↺ 重新评估</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📊 六维雷达图</h2>
+      <div style="max-width: 480px; margin: 0 auto"><canvas id="radar-canvas" width="600" height="600"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2>🔍 维度分析与改进建议</h2>
+      <div id="dim-results"></div>
+    </div>
+
+    <div class="card">
+      <h2>🗺️ 90 天行动计划</h2>
+      <div id="plan-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>📄 评估报告</h2>
+      <div class="report-pre" id="report-pre"></div>
+      <div class="row">
+        <button class="btn btn-primary" onclick="exportMarkdown()">⬇ 下载报告 (.md)</button>
+        <button class="btn btn-ghost" onclick="copyReport()">📋 复制报告</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>企业 AI 落地成熟度评估 · 本地计算，数据不出浏览器</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ================= 评估模型 ================= */
+const DIMENSIONS = [
+  {
+    id: "strategy", name: "战略与治理", icon: "🎯", color: "#1d4ed8",
+    desc: "企业是否把 AI 上升为战略、有高层共识、治理与预算保障到位。",
+    questions: [
+      { q: "AI 已被纳入公司战略规划，并有清晰的愿景、目标与优先级", hint: "如：有明确的 AI 战略文件或年度规划条目" },
+      { q: "高管层对 AI 投入有共识，并由高层直接推动关键 AI 项目", hint: "如：CEO/分管副总挂帅 AI 委员会" },
+      { q: "已建立 AI 治理机制（决策、立项、评审、风险与合规责任）", hint: "如：AI 治理委员会、伦理与合规审查流程" },
+      { q: "AI 有独立预算，且投入规模与业务目标相匹配", hint: "如：年度 AI 预算占 IT 预算比例明确" },
+    ],
+  },
+  {
+    id: "data", name: "数据基础", icon: "🗄️", color: "#0e7490",
+    desc: "数据是否集中、规范、可用，数据质量与安全合规是否可控。",
+    questions: [
+      { q: "核心业务数据已集中管理，具备跨系统打通与共享能力", hint: "如：数据仓库/湖仓已覆盖核心系统" },
+      { q: "建立了数据质量度量与治理流程（准确性、完整性、及时性）", hint: "如：有数据质量看板与责任到人的治理机制" },
+      { q: "数据资产已盘点并标准化，有统一的数据字典与口径", hint: "如：核心指标口径统一、元数据可查" },
+      { q: "数据安全与隐私合规（分级分类、脱敏、授权）已落地执行", hint: "如：敏感数据有脱敏与访问审计" },
+    ],
+  },
+  {
+    id: "tech", name: "技术与平台", icon: "🖥️", color: "#7c3aed",
+    desc: "算力、模型、开发平台与系统集成能力是否就绪。",
+    questions: [
+      { q: "已具备或规划了统一 AI 技术底座（算力、模型服务、开发平台）", hint: "如：大模型 API、GPU 资源或 MLOps 平台" },
+      { q: "AI 应用能与现有业务系统（ERP/CRM/MES 等）顺利集成", hint: "如：有 API 网关、主数据或低代码集成通道" },
+      { q: "建立了模型选型、评估与迭代的工程化机制", hint: "如：模型评测集、Prompt/微调版本管理" },
+      { q: "AI 系统的安全、合规、审计与风险控制已被纳入设计", hint: "如：有 AI 应用安全评审与监控告警" },
+    ],
+  },
+  {
+    id: "scenario", name: "业务场景", icon: "🧩", color: "#c2410c",
+    desc: "AI 是否落到真实业务场景并产生可量化的价值。",
+    questions: [
+      { q: "已系统梳理过业务流程中的 AI 应用机会，并形成场景清单", hint: "如：有场景机会地图与优先级排序" },
+      { q: "已有 AI 项目落地并跑出可量化的业务价值（降本/增效/增收）", hint: "如：客服成本下降 20% 等可验证指标" },
+      { q: "AI 应用已从单点场景向跨部门、跨流程复制推广", hint: "如：试点经验沉淀为标准解决方案" },
+      { q: "业务部门主动提出 AI 需求，而非仅由技术部门推动", hint: "如：业务侧有 AI 场景 owner" },
+    ],
+  },
+  {
+    id: "org", name: "组织与人才", icon: "👥", color: "#16a34a",
+    desc: "组织架构、人才梯队与变革文化是否支撑 AI 落地。",
+    questions: [
+      { q: "已设立专职 AI 团队/岗位（AI 负责人、数据科学家、AI 产品经理）", hint: "如：有独立 AI 中心或虚拟团队" },
+      { q: "业务骨干具备 AI 素养，能参与需求定义与落地验收", hint: "如：业务侧接受过 AI 通识培训" },
+      { q: "有系统的 AI 人才引进、培养与激励机制", hint: "如：有 AI 人才梯队与成长路径" },
+      { q: "组织文化鼓励用 AI 改进工作方式，变革阻力可控", hint: "如：有内部 AI 创新大赛/试点容错机制" },
+    ],
+  },
+  {
+    id: "ops", name: "运营与度量", icon: "📈", color: "#d97706",
+    desc: "AI 项目是否被持续度量、运营与迭代，ROI 是否清晰。",
+    questions: [
+      { q: "AI 项目有明确的 KPI/OKR 与价值度量方式", hint: "如：立项即有基线指标与目标值" },
+      { q: "建立了 AI 应用的持续运营与效果追踪机制", hint: "如：上线后有运营看板与定期复盘" },
+      { q: "模型/应用有定期评估、迭代与退役流程", hint: "如：有模型漂移监控与版本更新节奏" },
+      { q: "AI 投入产出（ROI）被定期复盘并向管理层汇报", hint: "如：季度 AI 价值报告" },
+    ],
+  },
+];
+
+const LEVELS = [
+  { tag: "L1", name: "观望期", min: 0,  max: 20, cls: "l1", desc: "AI 尚处观望或零星尝试，未形成组织级投入。" },
+  { tag: "L2", name: "探索期", min: 20, max: 40, cls: "l2", desc: "有初步探索与少量试点，但未成体系、价值未规模兑现。" },
+  { tag: "L3", name: "试点期", min: 40, max: 60, cls: "l3", desc: "单点试点初见成效，开始体系化建设，需加速复制推广。" },
+  { tag: "L4", name: "扩展期", min: 60, max: 80, cls: "l4", desc: "AI 规模化落地、体系成型，已进入组织级运营阶段。" },
+  { tag: "L5", name: "引领期", min: 80, max: 101, cls: "l5", desc: "AI 成为核心竞争力，具备行业领先的持续创新能力。" },
+];
+
+const adviceLow = [
+  "当前基础薄弱，建议先补齐该维度的基础能力，再考虑规模化投入。",
+  "此维度是明显短板，建议列为下阶段优先攻坚项，明确责任人与里程碑。",
+  "建议先从 1–2 个低垂果实动作入手，快速建立正反馈，再逐步深化。",
+];
+const adviceMid = [
+  "已具备一定基础，建议聚焦 1–2 个关键环节做深做实，形成可复制样板。",
+  "处于中等水平，建议将经验沉淀为标准流程/制度，扩大覆盖范围。",
+  "建议引入外部对标与专家资源，识别差距并制定针对性提升计划。",
+];
+const adviceHigh = [
+  "该维度表现良好，建议巩固优势并沉淀为组织能力与方法论。",
+  "已较成熟，可将经验向外输出、带动其他维度协同提升。",
+  "建议关注前沿实践，保持领先并探索更多创新场景。",
+];
+
+/* ================= 状态 ================= */
+let answers = {};   // dimId -> [4]
+let currentDim = 0;
+
+/* ================= 工具 ================= */
+function $(id) { return document.getElementById(id); }
+function show(id) {
+  ["view-home", "view-quiz", "view-result"].forEach(v => $(v).classList.toggle("hidden", v !== id));
+  window.scrollTo({ top: 0 });
+}
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function dimScore(dimId) {
+  const a = answers[dimId] || [];
+  if (!a.length) return 0;
+  return a.reduce((s, v) => s + v, 0) / a.length * 20; // 0-100
+}
+function totalPct() {
+  const all = DIMENSIONS.flatMap(d => answers[d.id] || []);
+  if (!all.length) return 0;
+  return Math.round(all.reduce((s, v) => s + v, 0) / (all.length * 5) * 100);
+}
+function levelOf(pct) {
+  return LEVELS.find(l => pct >= l.min && pct < l.max) || LEVELS[0];
+}
+function pick(arr, idx) { return arr[idx % arr.length]; }
+function adviceFor(score) {
+  if (score < 40) return pick(adviceLow, Math.floor(score / 13));
+  if (score < 70) return pick(adviceMid, Math.floor((score - 40) / 10));
+  return pick(adviceHigh, Math.floor((score - 70) / 10));
+}
+
+/* ================= 首页 ================= */
+function renderDimPreview() {
+  $("dim-preview").innerHTML = DIMENSIONS.map(d =>
+    `<div class="dim-card">
+       <div class="icon">${d.icon}</div>
+       <h3>${d.name}</h3>
+       <div class="muted">${d.desc}</div>
+       <div class="q-count" style="margin-top:8px">${d.questions.length} 个问题</div>
+     </div>`).join("");
+}
+
+/* ================= 问卷 ================= */
+function startQuiz() {
+  DIMENSIONS.forEach(d => { if (!answers[d.id]) answers[d.id] = [0, 0, 0, 0]; });
+  currentDim = 0;
+  renderQuiz();
+  show("view-quiz");
+}
+function renderQuiz() {
+  const d = DIMENSIONS[currentDim];
+  const done = DIMENSIONS.filter(x => (answers[x.id] || []).every(v => v > 0)).length;
+  const total = DIMENSIONS.length;
+  $("progress-fill").style.width = Math.round(done / total * 100) + "%";
+  $("quiz-step").textContent = `维度 ${currentDim + 1} / ${total}`;
+  $("quiz-progress").textContent = `已完成 ${done} / ${total} 个维度`;
+  $("quiz-dim-title").textContent = `${d.icon} ${d.name}`;
+  $("quiz-dim-desc").textContent = d.desc;
+  $("quiz-questions").innerHTML = d.questions.map((q, i) => {
+    const cur = answers[d.id][i];
+    return `<div class="question">
+      <div class="q-text">${i + 1}. ${q.q}</div>
+      <div class="q-hint">${q.hint}</div>
+      <div class="scale" data-qi="${i}">
+        ${[1, 2, 3, 4, 5].map(v =>
+          `<div class="scale-item${cur === v ? " sel" : ""}" data-v="${v}" onclick="setAnswer(${i}, ${v})">
+             <span class="n">${v}</span><span class="l">${["完全不符合","较不符合","一般","较符合","完全符合"][v - 1]}</span>
+           </div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  $("quiz-prev").disabled = currentDim === 0;
+  const nextBtn = $("quiz-next");
+  const allDone = answers[d.id].every(v => v > 0);
+  nextBtn.textContent = currentDim === DIMENSIONS.length - 1 ? "查看评估结果 →" : "下一维度 →";
+  nextBtn.disabled = !allDone;
+}
+function setAnswer(qi, v) {
+  const d = DIMENSIONS[currentDim];
+  answers[d.id][qi] = v;
+  renderQuiz();
+}
+function prevDim() {
+  if (currentDim > 0) { currentDim--; renderQuiz(); }
+}
+function nextDim() {
+  const d = DIMENSIONS[currentDim];
+  if (!answers[d.id].every(v => v > 0)) { toast("请先完成本维度所有问题"); return; }
+  if (currentDim < DIMENSIONS.length - 1) { currentDim++; renderQuiz(); }
+  else showResult();
+}
+
+/* ================= 结果 ================= */
+function showResult() {
+  const pct = totalPct();
+  const lv = levelOf(pct);
+  $("score-num").textContent = pct;
+  $("score-tag").textContent = `${lv.tag} ${lv.name}`;
+  $("score-tag").className = "tag " + lv.cls;
+  $("score-level").textContent = `${lv.tag} · ${lv.name}`;
+  $("score-desc").textContent = lv.desc;
+  drawRing(pct);
+  drawRadar();
+  renderDimResults();
+  renderPlan();
+  renderReport();
+  show("view-result");
+}
+
+function renderDimResults() {
+  $("dim-results").innerHTML = DIMENSIONS.map(d => {
+    const s = Math.round(dimScore(d.id));
+    const pill = s < 40 ? '<span class="pill low">短板</span>' : s < 70 ? '<span class="pill mid">中等</span>' : '<span class="pill ok">良好</span>';
+    return `<div class="dim-result">
+      <div class="head">
+        <span class="name">${d.icon} ${d.name} ${pill}</span>
+        <span style="font-weight:700; color:var(--primary)">${s} 分</span>
+      </div>
+      <div class="bar"><i style="width:${s}%"></i></div>
+      <div class="analysis">${d.desc}</div>
+      <div class="advice"><strong>改进建议：</strong>${adviceFor(s)}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderPlan() {
+  const sorted = DIMENSIONS.map(d => ({ ...d, s: dimScore(d.id) })).sort((a, b) => a.s - b.s);
+  const low1 = sorted[0], low2 = sorted[1];
+  const items = [
+    { phase: "第 1–30 天", t: `攻坚短板：${low1.name} 基础建设`, d: "围绕最低分维度启动 1–2 个速赢动作，明确责任人、基线指标与 30 天验收标准。" },
+    { phase: "第 1–30 天", t: `补齐次短板：${low2.name} 关键缺口`, d: "针对该维度得分最低的 1–2 个问题项，制定具体补齐措施（制度、工具或人员）。" },
+    { phase: "第 31–60 天", t: "标杆试点：复制已验证场景", d: `将得分较高维度（如${sorted[sorted.length-1].name}）的成熟做法推广到 2–3 个相邻业务场景，沉淀标准方案。` },
+    { phase: "第 31–60 天", t: "建立度量体系", d: "为 AI 项目统一 KPI/OKR 模板与价值看板，确保立项即有基线、上线即被追踪。" },
+    { phase: "第 61–90 天", t: "治理与组织升级", d: "完善 AI 治理与风险合规机制，为业务骨干安排 AI 素养培训，推动需求由业务主动提出。" },
+    { phase: "第 61–90 天", t: "季度复盘与路线图", d: "召开 AI 落地季度复盘会，基于实际 ROI 数据修订年度路线图与预算分配。" },
+  ];
+  $("plan-list").innerHTML = items.map(it =>
+    `<div class="plan-item"><div class="phase">${it.phase}</div>
+     <div class="content"><div class="t">${it.t}</div><div class="d">${it.d}</div></div></div>`).join("");
+}
+
+/* ================= 报告 ================= */
+function buildReport() {
+  const pct = totalPct();
+  const lv = levelOf(pct);
+  const now = new Date().toLocaleDateString("zh-CN");
+  const lines = [];
+  lines.push(`# 企业 AI 落地成熟度评估报告`);
+  lines.push(``);
+  lines.push(`- 评估日期：${now}`);
+  lines.push(`- 评估模型：6 维度 × 4 问题（1–5 分制），共 24 题`);
+  lines.push(`- 综合成熟度：**${pct} 分 / ${lv.tag} ${lv.name}**`);
+  lines.push(`- 结论：${lv.desc}`);
+  lines.push(``);
+  lines.push(`## 六维得分`);
+  lines.push(``);
+  lines.push(`| 维度 | 得分 | 评价 |`);
+  lines.push(`| --- | --- | --- |`);
+  DIMENSIONS.forEach(d => {
+    const s = Math.round(dimScore(d.id));
+    const rank = s < 40 ? "短板" : s < 70 ? "中等" : "良好";
+    lines.push(`| ${d.name} | ${s} | ${rank} |`);
+  });
+  lines.push(``);
+  lines.push(`## 维度分析与改进建议`);
+  lines.push(``);
+  DIMENSIONS.forEach(d => {
+    const s = Math.round(dimScore(d.id));
+    lines.push(`### ${d.icon} ${d.name}（${s} 分）`);
+    lines.push(``);
+    lines.push(`- 现状：${d.desc}`);
+    lines.push(`- 建议：${adviceFor(s)}`);
+    lines.push(``);
+  });
+  lines.push(`## 90 天行动计划`);
+  lines.push(``);
+  const sorted = DIMENSIONS.map(d => ({ ...d, s: dimScore(d.id) })).sort((a, b) => a.s - b.s);
+  const plan = [
+    ["第 1–30 天", `攻坚短板「${sorted[0].name}」基础建设`, "启动 1–2 个速赢动作，明确责任人、基线指标与验收标准。"],
+    ["第 1–30 天", `补齐次短板「${sorted[1].name}」关键缺口`, "针对最低分问题项制定具体补齐措施。"],
+    ["第 31–60 天", "标杆试点复制", `把「${sorted[sorted.length-1].name}」的成熟做法推广到 2–3 个相邻场景。`],
+    ["第 31–60 天", "建立度量体系", "统一 AI 项目 KPI/OKR 模板与价值看板。"],
+    ["第 61–90 天", "治理与组织升级", "完善治理合规机制，开展业务骨干 AI 素养培训。"],
+    ["第 61–90 天", "季度复盘与路线图", "基于 ROI 数据修订年度路线图与预算。"],
+  ];
+  plan.forEach(p => lines.push(`- **${p[0]}**：${p[1]} — ${p[2]}`));
+  lines.push(``);
+  lines.push(`> 本报告由「企业 AI 落地成熟度评估」工具生成，评估数据仅在本机浏览器内计算。`);
+  return lines.join("\n");
+}
+function renderReport() { $("report-pre").textContent = buildReport(); }
+function exportMarkdown() {
+  const blob = new Blob([buildReport()], { type: "text/markdown;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `AI成熟度评估报告_${new Date().toISOString().slice(0, 10)}.md`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("报告已下载");
+}
+function copyReport() {
+  navigator.clipboard.writeText(buildReport()).then(
+    () => toast("报告已复制到剪贴板"),
+    () => { const ta = document.createElement("textarea"); ta.value = buildReport(); document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast("报告已复制"); }
+  );
+}
+function restart() {
+  answers = {};
+  DIMENSIONS.forEach(d => answers[d.id] = [0, 0, 0, 0]);
+  show("view-home");
+  window.scrollTo({ top: 0 });
+}
+
+/* ================= 画图 ================= */
+function drawRing(pct) {
+  const c = $("ring-canvas"), ctx = c.getContext("2d");
+  const size = c.width, cx = size / 2, cy = size / 2, r = size / 2 - 18;
+  ctx.clearRect(0, 0, size, size);
+  ctx.lineWidth = 22;
+  ctx.lineCap = "round";
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.strokeStyle = "#e2e8f0"; ctx.stroke();
+  const angle = (pct / 100) * Math.PI * 2 - Math.PI / 2;
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, "#1e3a8a"); grad.addColorStop(1, "#0ea5e9");
+  ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, angle); ctx.strokeStyle = grad; ctx.stroke();
+}
+
+function drawRadar() {
+  const c = $("radar-canvas"), ctx = c.getContext("2d");
+  const size = c.width, cx = size / 2, cy = size / 2, R = size / 2 - 70;
+  const n = DIMENSIONS.length;
+  const angle = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  ctx.clearRect(0, 0, size, size);
+
+  // grid rings
+  for (let ring = 1; ring <= 4; ring++) {
+    const r = (R * ring) / 4;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const x = cx + r * Math.cos(angle(i)), y = cy + r * Math.sin(angle(i));
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1; ctx.stroke();
+  }
+  // axes
+  for (let i = 0; i < n; i++) {
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R * Math.cos(angle(i)), cy + R * Math.sin(angle(i)));
+    ctx.strokeStyle = "#e2e8f0"; ctx.stroke();
+  }
+  // labels
+  ctx.font = "600 15px -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillStyle = "#334155";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (let i = 0; i < n; i++) {
+    const d = DIMENSIONS[i];
+    const x = cx + (R + 26) * Math.cos(angle(i));
+    const y = cy + (R + 26) * Math.sin(angle(i));
+    ctx.fillText(d.name, x, y);
+    const s = Math.round(dimScore(d.id));
+    ctx.font = "700 13px -apple-system, 'PingFang SC', sans-serif";
+    ctx.fillStyle = DIMENSIONS[i].color;
+    ctx.fillText(s, x, y + 20);
+    ctx.font = "600 15px -apple-system, 'PingFang SC', sans-serif";
+    ctx.fillStyle = "#334155";
+  }
+  // data polygon
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const r = (dimScore(d.id) / 100) * R;
+    const x = cx + r * Math.cos(angle(i)), y = cy + r * Math.sin(angle(i));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "rgba(30, 58, 138, .18)";
+  ctx.fill();
+  ctx.strokeStyle = "#1e3a8a"; ctx.lineWidth = 2.5; ctx.stroke();
+  // data points
+  for (let i = 0; i < n; i++) {
+    const r = (dimScore(d.id) / 100) * R;
+    const x = cx + r * Math.cos(angle(i)), y = cy + r * Math.sin(angle(i));
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#1e3a8a"; ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+  }
+}
+
+/* ================= init ================= */
+renderDimPreview();
+</script>
+</body>
+</html>
